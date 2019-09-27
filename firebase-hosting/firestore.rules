@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+    match /databases/{database}/documents {
+        function signedIn() {
+            return request.auth.uid != null;
+        }
+
+        function messageIsSentToUser() {
+            return signedIn() && request.auth.uid in resource.data.sentTo;
+        }
+
+        function userIsFriend() {
+            return signedIn() && request.auth.uid in resource.data.friends;
+        }
+
+        function isOwner(uid) {
+            return signedIn() && request.auth.uid == uid;
+        }
+
+        match /{path=**}/data/{userData} {
+            allow read: if userIsFriend();
+        }
+		
+        match /users/{user} {
+            allow read: if signedIn();
+
+            match /config/{config} {
+                allow read: if isOwner(user);
+                allow write: if isOwner(user);
+            }    
+            match /data/{userData} {
+                allow read: if userIsFriend();
+            }
+        }
+
+        match /{path=**}/messages/{message} {
+            allow read: if messageIsSentToUser();
+        }
+
+        match /chatRooms/{room}/messages/{message} {
+
+            function isRoomMember() {
+                return signedIn() && get(/databases/$(database)/documents/chatRooms/$(room)/participants/$(request.auth.uid)).data.member == true;
+            }
+
+            function isFriendRequest() {
+                return signedIn() && request.resource.data.type == "friend-request" && request.auth.uid in room.split("-&&-");
+            }
+
+            function getMessageOwner() {
+                return get(/databases/$(database)/documents/chatRooms/$(room)/messages/$(message)).data.userId;
+            }
+
+            allow read: if messageIsSentToUser();
+            allow delete: if isOwner(resource.data.userId) && resource.data.timestamp == null;
+            allow create: if isRoomMember() || isFriendRequest();
+            allow update: if isOwner(resource.data.userId);
+
+            match /messageExtra/status {
+                allow write: if isRoomMember() && request.resource.data.size() == 1 && request.resource.data[request.auth.uid] != null;
+                allow read: if isOwner(getMessageOwner());
+            }
+        }
+    }
+}

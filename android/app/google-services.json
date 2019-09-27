@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "85950014788",
+    "firebase_url": "https://wiconn-mobile.firebaseio.com",
+    "project_id": "wiconn-mobile",
+    "storage_bucket": "wiconn-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85950014788:android:962223911d1af5e6",
+        "android_client_info": {
+          "package_name": "com.example.wiconn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "85950014788-q4ibvorlra62s0md8lk4jjb8cguhho1r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD0EEHOEIbVdM7Lw_LFbFyM_aaTjiWW4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "85950014788-q4ibvorlra62s0md8lk4jjb8cguhho1r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85950014788:android:34ad3b2f37e3949d",
+        "android_client_info": {
+          "package_name": "com.wiconn.wiconn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "85950014788-q4ibvorlra62s0md8lk4jjb8cguhho1r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD0EEHOEIbVdM7Lw_LFbFyM_aaTjiWW4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "85950014788-q4ibvorlra62s0md8lk4jjb8cguhho1r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

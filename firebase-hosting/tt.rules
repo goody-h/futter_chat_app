@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+    // Authenticated users can query the posts collection group
+    // Applies to collection queries, collection group queries, and
+    // single document retrievals
+    match /{path=**}/posts/{post} {
+      allow read: if request.auth.uid != null;
+    }
+    match /forums/{forumid}/posts/{postid} {
+      // Only a post's author can write to a post
+      allow write: if request.auth.uid == resource.data.author;
+
+    }
+  }
+}
+
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    // Returns `true` if the requested post is 'published'
+    // or the user authored the post
+    function authorOrPublished() {
+      return resource.data.published == true || request.auth.uid == resource.data.author;
+    }
+
+    match /{path=**}/posts/{post} {
+
+      // Anyone can query published posts
+      // Authors can query their unpublished posts
+      allow list: if authorOrPublished();
+
+      // Anyone can retrieve a published post
+      // Authors can retrieve an unpublished post
+      allow get: if authorOrPublished();
+    }
+
+    match /forums/{forumid}/posts/{postid} {
+      // Only a post's author can write to a post
+      allow write: if request.auth.uid == resource.data.author;
+    }
+  }
+}
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // True if the user is signed in or the requested data is 'public'
+    function signedInOrPublic() {
+      return request.auth.uid != null || resource.data.visibility == 'public';
+    }
+
+    match /cities/{city} {
+      allow read, write: if signedInOrPublic();
+      allow list: if request.query.limit <= 10;
+    }
+
+    match /users/{user} {
+      allow read, write: if signedInOrPublic();
+    }
+
+// Matches any document in the cities collection as well as any document
+    // in a subcollection.
+match /{document=**} {
+      allow read, write: if request.auth.uid != null;
+    }
+
+    // Allow the user to access documents in the "cities" collection
+    // only if they are authenticated.
+    match /cities/{city} {
+      allow read, write: if request.auth.uid != null;
+    }
+
+    // Make sure the uid of the requesting user matches name of the user
+    // document. The wildcard expression {userId} makes the userId variable
+    // available in rules.
+    match /users/{userId} {
+      allow read, update, delete: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+    }
+
+    // Allow the user to read data if the document has the 'visibility'
+    // field set to 'public'
+    match /cities/{city} {
+      allow read: if resource.data.visibility == 'public';
+    }
+
+    // Make sure all cities have a positive population and
+    // the name is not changed
+    match /cities/{city} {
+      allow update: if request.resource.data.population > 0
+                    && request.resource.data.name == resource.data.name;
+    }
+
+    match /cities/{city} {
+      // Make sure a 'users' document exists for the requesting user before
+      // allowing any writes to the 'cities' collection
+      allow create: if exists(/databases/$(database)/documents/users/$(request.auth.uid))
+
+      // Allow the user to delete cities if their user document has the
+      // 'admin' field set to 'true'
+      allow delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.admin == true
+    }
+
+  	match /{path=**}/inner/{docs} {
+      allow read: if true;
+    }
+		match /outer/{document}/inner/{doc} {
+      allow read, write: if true;
+    }
+  }
+}
